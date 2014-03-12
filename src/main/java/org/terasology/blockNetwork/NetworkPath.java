@@ -15,6 +15,20 @@
  */
 package org.terasology.blockNetwork;
 
-public interface NetworkNode {
-    boolean isConnectedTo(NetworkNode networkNode);
+public class NetworkPath {
+    private int distance;
+    private Iterable<NetworkNode> path;
+
+    public NetworkPath(int distance, Iterable<NetworkNode> path) {
+        this.distance = distance;
+        this.path = path;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    public Iterable<NetworkNode> getPath() {
+        return path;
+    }
 }
