@@ -46,6 +46,8 @@ public class SidedLocationNetworkNode extends LocationNetworkNode {
 
     @Override
     public boolean isConnectedTo(NetworkNode networkNode) {
+        if (networkNode == null || !(networkNode instanceof SidedLocationNetworkNode)) return false;
+
         if( super.isConnectedTo(networkNode)) {
             SidedLocationNetworkNode locationNetworkNode = (SidedLocationNetworkNode) networkNode;
             return areConnected(location, connectionSides, locationNetworkNode.location, locationNetworkNode.connectionSides);

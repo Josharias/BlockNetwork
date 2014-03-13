@@ -51,7 +51,7 @@ public class LocationNetworkNode implements NetworkNode {
 
     @Override
     public boolean isConnectedTo(NetworkNode networkNode) {
-        if (networkNode == null || !networkNode.getClass().isAssignableFrom(this.getClass())) return false;
+        if (networkNode == null || !(networkNode instanceof LocationNetworkNode)) return false;
 
         LocationNetworkNode locationNetworkNode = (LocationNetworkNode) networkNode;
 

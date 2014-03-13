@@ -13,7 +13,6 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class BlockNetworkTest {
     private BlockNetwork blockNetwork;
@@ -65,9 +64,21 @@ public class BlockNetworkTest {
         assertEquals(1, listener.networksAdded);
 
         blockNetwork.removeNetworkingBlock(toNode(new Vector3i(0, 0, 0), allDirections));
+        assertEquals(2, listener.networksAdded);
         assertEquals(2, blockNetwork.getNetworks().size());
     }
 
+    @Test
+    public void removingNetworkingNodeKeepsExistingNetwork() {
+        blockNetwork.addNetworkingBlock(toNode(new Vector3i(0, 0, 1), allDirections));
+        blockNetwork.addNetworkingBlock(toNode(new Vector3i(0, 0, 0), allDirections));
+        assertEquals(1, blockNetwork.getNetworks().size());
+        assertEquals(1, listener.networksAdded);
+
+        blockNetwork.removeNetworkingBlock(toNode(new Vector3i(0, 0, 0), allDirections));
+        assertEquals(1, listener.networksAdded);
+        assertEquals(1, blockNetwork.getNetworks().size());
+    }
     @Test
     public void addingNetworkingNodeJoinsExistingNetworks() {
         blockNetwork.addNetworkingBlock(toNode(new Vector3i(0, 0, 1), allDirections));

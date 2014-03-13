@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -29,7 +28,7 @@ public class BlockNetwork {
     // an adjacency list of nodes connecting to each other
     private Map<NetworkNode, Set<NetworkNode>> allNetworkNodes = Maps.newHashMap();
 
-    private Set<NetworkTopologyListener> listeners = new HashSet<NetworkTopologyListener>();
+    private Set<NetworkTopologyListener> listeners = Sets.newLinkedHashSet();
 
     private boolean mutating = false;
 
@@ -141,12 +140,14 @@ public class BlockNetwork {
         for (NetworkNode node : nodesInSource) {
             notifyNetworkingNodeAdded(target, node);
         }
+
+        source.mergeTo(target);
     }
 
     public void updateNetworkingBlock(NetworkNode oldNode, NetworkNode newNode) {
         logger.info("Replacing networking node: " + oldNode.toString() + " with: " + newNode.toString());
-        addNetworkingBlock(newNode);
         removeNetworkingBlock(oldNode);
+        addNetworkingBlock(newNode);
     }
 
     public void removeNetworkingBlock(NetworkNode networkNode) {
@@ -165,7 +166,7 @@ public class BlockNetwork {
                 allNetworkNodes.get(connectedNode).remove(networkNode);
             }
 
-            Set<NetworkNode> needsNewNetwork = Sets.newHashSet();
+            Queue<NetworkNode> needsNewNetwork = Queues.newArrayDeque();
             needsNewNetwork.addAll(connectedNodes);
 
             // ensure that the network is still intact, if not,  split it up
@@ -201,12 +202,14 @@ public class BlockNetwork {
                 }
             }
 
-
+            // reuse the existing network
+            needsNewNetwork.poll();
             // create new networks
             for (NetworkNode node : needsNewNetwork) {
                 Network newNetwork = networkFactory.get();
-                notifyNetworkAdded(newNetwork);
                 Set<NetworkNode> newNetworkNodes = Sets.newHashSet();
+                allNetworks.put(newNetwork, newNetworkNodes);
+                notifyNetworkAdded(newNetwork);
                 Set<NetworkNode> originalNetworkNodes = allNetworks.get(originalNetwork);
                 for (Map.Entry<NetworkNode, NetworkNode> item : visitedNodes.entrySet()) {
                     if (item.getValue() == node) {
@@ -217,7 +220,7 @@ public class BlockNetwork {
 
                     }
                 }
-                allNetworks.put(newNetwork, newNetworkNodes);
+
             }
 
             if (allNetworks.get(originalNetwork).size() == 0) {
@@ -275,6 +278,9 @@ public class BlockNetwork {
     }
 
     private class BasicNetwork implements Network {
+        @Override
+        public void mergeTo(Network network) {
+        }
     }
 
     private class BasicNetworkFactory implements Supplier<Network> {
