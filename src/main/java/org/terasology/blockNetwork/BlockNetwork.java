@@ -22,8 +22,6 @@ import java.util.Set;
 public class BlockNetwork {
     private static final Logger logger = LoggerFactory.getLogger(BlockNetwork.class);
 
-    private Supplier<Network> networkFactory;
-
     private Map<Network, Set<NetworkNode>> allNetworks = Maps.newHashMap();
     // an adjacency list of nodes connecting to each other
     private Map<NetworkNode, Set<NetworkNode>> allNetworkNodes = Maps.newHashMap();
@@ -31,14 +29,6 @@ public class BlockNetwork {
     private Set<NetworkTopologyListener> listeners = Sets.newLinkedHashSet();
 
     private boolean mutating = false;
-
-    public BlockNetwork() {
-        networkFactory  = new BasicNetworkFactory();
-    }
-
-    public BlockNetwork(Supplier<Network> networkFactory) {
-        this.networkFactory = networkFactory;
-    }
 
     public void addTopologyListener(NetworkTopologyListener listener) {
         listeners.add(listener);
@@ -103,7 +93,7 @@ public class BlockNetwork {
         }
 
         if (network == null) {
-            network = networkFactory.get();
+            network = new BasicNetwork();
             allNetworks.put(network, Sets.<NetworkNode>newHashSet());
             notifyNetworkAdded(network);
         }
@@ -140,8 +130,6 @@ public class BlockNetwork {
         for (NetworkNode node : nodesInSource) {
             notifyNetworkingNodeAdded(target, node);
         }
-
-        source.mergeTo(target);
     }
 
     public void updateNetworkingBlock(NetworkNode oldNode, NetworkNode newNode) {
@@ -206,7 +194,7 @@ public class BlockNetwork {
             needsNewNetwork.poll();
             // create new networks
             for (NetworkNode node : needsNewNetwork) {
-                Network newNetwork = networkFactory.get();
+                Network newNetwork = new BasicNetwork();
                 Set<NetworkNode> newNetworkNodes = Sets.newHashSet();
                 allNetworks.put(newNetwork, newNetworkNodes);
                 notifyNetworkAdded(newNetwork);
